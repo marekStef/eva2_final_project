@@ -21,7 +21,11 @@ def main():
     parser.add_argument('--index', type=int, default=0, help='Index of test image to attack (0‑9999)')
     parser.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
     parser.add_argument('--max_iter', type=int, default=100, help='DE generations')
-    parser.add_argument('--popsize', type=int, default=20, help='DE popsize (SciPy definition)')
+    parser.add_argument('--popsize', type=int, default=400, help='DE popsize (SciPy definition)')
+
+    parser.add_argument('--pixels',   type=int, default=1,   help='1, 3 or 5 (paper)')
+    parser.add_argument('--restarts', type=int, default=1)
+
     args = parser.parse_args()
 
     # Load test set image
@@ -46,8 +50,17 @@ def main():
     print(f'Original prediction: {orig_pred} ({CIFAR10_LABELS[orig_pred]}), true label: {label} ({CIFAR10_LABELS[label]})')
 
     # Run attack
-    adv_img, adv_label, adv_probs, success, _ = one_pixel_attack(
-        model, image, label, device=args.device, max_iter=args.max_iter, popsize=args.popsize
+    # adv_img, adv_label, adv_probs, success, _ = one_pixel_attack(
+    #     model, image, label, device=args.device, max_iter=args.max_iter, popsize=args.popsize
+    # )
+    adv_img, adv_label, adv_probs, success = one_pixel_attack(
+        model, image, label,
+        device   = args.device,
+        pixels   = args.pixels,
+        popsize  = args.popsize,
+        max_iter = args.max_iter,
+        restarts = args.restarts,
+        verbose  = True
     )
     print(f'Adversarial prediction: {adv_label} ({CIFAR10_LABELS[adv_label]}), success={success}')
 
